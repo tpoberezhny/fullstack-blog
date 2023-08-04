@@ -4,6 +4,9 @@ import mongoose from "mongoose";
 import dotenv from 'dotenv';
 dotenv.config();
 
+import { validationResult } from 'express-validator';
+import { registerValidation } from "./validations/auth.js";
+
 const adminPassword = process.env.MONGO_ADMIN_PASSWORD;
 
 mongoose
@@ -17,8 +20,15 @@ const app = express();
 
 app.use(express.json());
 
-app.post("/auth/register", (req, res) => {
-  
+app.post("/auth/register", registerValidation, (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json(errors.array())
+  }
+
+  res.json({
+    success: true
+  })
 });
 
 app.listen(4444, (err) => {
