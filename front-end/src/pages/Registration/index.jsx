@@ -6,7 +6,7 @@ import Button from "@mui/material/Button";
 import Avatar from "@mui/material/Avatar";
 import { useDispatch, useSelector } from "react-redux";
 import { useForm } from "react-hook-form";
-import { fetchAuth, selectIsAuth } from "../../redux/slices/auth";
+import { fetchRegister, selectIsAuth } from "../../redux/slices/auth";
 import { Navigate } from "react-router-dom";
 
 import styles from "./Login.module.scss";
@@ -17,11 +17,10 @@ export const Registration = () => {
   const {
     register,
     handleSubmit,
-    setError,
     formState: { errors, isValid },
   } = useForm({
     defaultValues: {
-      fullname: "Lovely User",
+      fullName: "Lovely User",
       email: "user@test.com",
       password: "12345",
     },
@@ -29,7 +28,7 @@ export const Registration = () => {
   });
 
   const onSubmit = async (values) => {
-    const data = await dispatch(fetchAuth(values));
+    const data = await dispatch(fetchRegister(values));
 
     if (!data.payload) {
       return alert("Can not create account");
@@ -53,9 +52,9 @@ export const Registration = () => {
       </div>
       <form onSubmit={handleSubmit(onSubmit)}>
         <TextField
-          error={Boolean(errors.fullname?.message)}
-          helperText={errors.fullname?.message}
-          {...register("fullname", { required: "Fill in your Full Name" })}
+          error={Boolean(errors.fullName?.message)}
+          helperText={errors.fullName?.message}
+          {...register("fullName", { required: "Fill in your Full Name" })}
           className={styles.field}
           label="Full Name"
           fullWidth
