@@ -42,7 +42,8 @@ export const getOne = async (req, res) => {
       {
         new: true, // This option returns the updated document
       }
-    ).exec();
+    ).populate('user')
+    .exec();
 
     if (!updatedDoc) {
       return res.status(404).json({
