@@ -4,7 +4,10 @@ export const getLastTags = async (req, res) => {
   try {
     const posts = await PostModel.find().limit(5).exec();
 
-    const tags = posts.map(obj => obj.tags).flat().slice(0, 5)
+    const tags = posts
+      .map((obj) => obj.tags)
+      .flat()
+      .slice(0, 5);
 
     res.json(tags);
   } catch (err) {
@@ -13,7 +16,7 @@ export const getLastTags = async (req, res) => {
       message: "Failed while loading posts",
     });
   }
-}
+};
 
 export const getAll = async (req, res) => {
   try {
@@ -42,8 +45,9 @@ export const getOne = async (req, res) => {
       {
         new: true, // This option returns the updated document
       }
-    ).populate('user')
-    .exec();
+    )
+      .populate("user")
+      .exec();
 
     if (!updatedDoc) {
       return res.status(404).json({
@@ -91,7 +95,7 @@ export const create = async (req, res) => {
       title: req.body.title,
       text: req.body.text,
       imageUrl: req.body.imageUrl,
-      tags: req.body.tags.split(','),
+      tags: req.body.tags.split(","),
       user: req.userId,
     });
 
@@ -119,7 +123,7 @@ export const update = async (req, res) => {
         text: req.body.text,
         imageUrl: req.body.imageUrl,
         userId: req.body.userId,
-        tags: req.body.tags,
+        tags: req.body.tags.split(","),
       }
     );
     res.json({

@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import TextField from "@mui/material/TextField";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
@@ -9,9 +9,10 @@ import styles from "./AddPost.module.scss";
 import { useSelector } from "react-redux";
 import { selectIsAuth } from "../../redux/slices/auth";
 import axios from "../../axios";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate, Navigate, useParams } from "react-router-dom";
 
 export const AddPost = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const isAuth = useSelector(selectIsAuth);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,6 +21,8 @@ export const AddPost = () => {
   const [tags, setTags] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const inputFileRef = useRef(null);
+
+  const isEditing = Boolean(id);
 
   const handleChangeFile = async (event) => {
     try {
@@ -52,16 +55,33 @@ export const AddPost = () => {
         tags,
         imageUrl,
       };
-      const { data } = await axios.post("/posts", fields);
+      const { data } = isEditing ? await axios.patch(`/posts/${id}`, fields) : await axios.post("/posts", fields);
 
-      const id = data._id;
+      const _id = isEditing ? id : data._id;
 
-      navigate(`/posts/${id}`);
+      navigate(`/posts/${_id}`);
     } catch (err) {
       console.warn(err);
       alert("Error while trying to create a post");
     }
   };
+
+  useEffect(() => {
+    if (id) {
+      axios
+        .get(`/posts/${id}`)
+        .then(({ data }) => {
+          setTitle(data.title);
+          setText(data.text);
+          setImageUrl(data.imageUrl);
+          setTags(data.tags.join(","));
+        })
+        .catch((err) => {
+          console.warn(err);
+          alert("Error getting info about post");
+        });
+    }
+  }, []);
 
   const options = useMemo(
     () => ({
@@ -140,7 +160,7 @@ export const AddPost = () => {
       />
       <div className={styles.buttons}>
         <Button onClick={onSubmit} size="large" variant="contained">
-          Publish
+          {isEditing ? 'Save' : 'Publish'}
         </Button>
         <Button size="large">Cancel</Button>
       </div>
