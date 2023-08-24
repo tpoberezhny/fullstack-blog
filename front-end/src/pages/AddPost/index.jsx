@@ -9,11 +9,13 @@ import styles from "./AddPost.module.scss";
 import { useSelector } from "react-redux";
 import { selectIsAuth } from "../../redux/slices/auth";
 import axios from "../../axios";
-import { Navigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 
 export const AddPost = () => {
+  const navigate = useNavigate();
   const isAuth = useSelector(selectIsAuth);
-  const [value, setValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [text, setText] = useState("");
   const [title, setTitle] = useState("");
   const [tags, setTags] = useState("");
   const [imageUrl, setImageUrl] = useState("");
@@ -33,12 +35,33 @@ export const AddPost = () => {
   };
 
   const onClickRemoveImage = () => {
-    setImageUrl('')
+    setImageUrl("");
   };
 
-  const onChange = useCallback((value) => {
-    setValue(value);
+  const onChange = useCallback((text) => {
+    setText(text);
   }, []);
+
+  const onSubmit = async () => {
+    try {
+      setIsLoading(true);
+
+      const fields = {
+        title,
+        text,
+        tags: tags.split(','),
+        imageUrl,
+      };
+      const { data } = await axios.post("/posts", fields);
+
+      const id = data._id;
+
+      navigate(`/posts/${id}`);
+    } catch (err) {
+      console.warn(err);
+      alert("Error while trying to create a post");
+    }
+  };
 
   const options = useMemo(
     () => ({
@@ -85,7 +108,7 @@ export const AddPost = () => {
             Delete
           </Button>
           <img
-            className={styles.image}
+            style={{ width: "100%" }}
             src={`http://localhost:4444${imageUrl}`}
             alt="Uploaded"
           />
@@ -111,12 +134,12 @@ export const AddPost = () => {
       />
       <SimpleMDE
         className={styles.editor}
-        value={value}
+        text={text}
         onChange={onChange}
         options={options}
       />
       <div className={styles.buttons}>
-        <Button size="large" variant="contained">
+        <Button onClick={onSubmit} size="large" variant="contained">
           Publish
         </Button>
         <Button size="large">Cancel</Button>
